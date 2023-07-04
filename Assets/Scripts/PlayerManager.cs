@@ -5,9 +5,21 @@ using UnityEngine;
 public class PlayerManager : MonoBehaviour {
 
     [SerializeField] private float moveSpeed = 5f;
-    [SerializeField] private InputManager inputManager;
+    [SerializeField] private float jumpAmount = 5f;
+    [SerializeField] private float gravityWater = 1f;
+    [SerializeField] private float gravityNormal = 2f;
+    [SerializeField] private float gravityFalling = 4f;
 
-    private bool isUnderwater;
+    [SerializeField] private InputManager inputManager;
+    [SerializeField] private Rigidbody2D rb;
+
+    [SerializeField] private bool isUnderwater = false;
+
+    private void Start() {
+        inputManager.OnJump += InputManager_OnJump;
+
+        rb = GetComponent<Rigidbody2D>();
+    }
 
     private void Update() {
         HandleMovement();
@@ -16,9 +28,29 @@ public class PlayerManager : MonoBehaviour {
     private void HandleMovement() {
         Vector2 inputVector = inputManager.GetMovementVector();
 
-        float moveAmount = moveSpeed * Time.deltaTime;
+        if (isUnderwater) {
+            rb.velocity = inputVector * moveSpeed;
+        } else {
+            rb.velocity = new Vector2(inputVector.x * moveSpeed, rb.velocity.y);
+        }
+        
+        HandleGravity();
+    }
 
-        if (!isUnderwater)
-            transform.position += new Vector3(inputVector.x, 0, 0) * moveAmount;
+    private void InputManager_OnJump(object sender, System.EventArgs e) {
+        if (!isUnderwater && rb.velocity.y == 0) {
+            rb.AddForce(Vector2.up * jumpAmount, ForceMode2D.Impulse);
+        }
+    }
+
+    private void HandleGravity() {
+        if (rb.velocity.y >= 0) {
+                rb.gravityScale = gravityNormal;
+        } else {
+            rb.gravityScale = gravityFalling;
+        }
+
+        if (isUnderwater)
+            rb.gravityScale = gravityWater;
     }
 }
