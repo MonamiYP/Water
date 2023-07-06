@@ -13,7 +13,7 @@ public class PlayerManager : MonoBehaviour {
     [SerializeField] private InputManager inputManager;
     [SerializeField] private Rigidbody2D rb;
 
-    [SerializeField] private bool isUnderwater = false;
+    [SerializeField] public bool isUnderwater = false;
 
     private void Start() {
         inputManager.OnJump += InputManager_OnJump;

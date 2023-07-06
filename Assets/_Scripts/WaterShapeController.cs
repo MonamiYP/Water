@@ -12,13 +12,12 @@ public class WaterShapeController : MonoBehaviour {
     [SerializeField] private GameObject wavePointPrefab;
     [SerializeField] private GameObject wavePoints;
 
-    [SerializeField] private List<WaterSpring> springs = new();
+    [SerializeField] private List<Spring> springs = new();
     [SerializeField] private float springStiffness = 0.1f;
     [SerializeField] private float dampening = 0.03f;
     [SerializeField] private float spread = 0.006f;
 
     void OnValidate() {
-        // Clean waterpoints 
         StartCoroutine(CreateWaves());
     }
     IEnumerator CreateWaves() {
@@ -29,18 +28,9 @@ public class WaterShapeController : MonoBehaviour {
         SetWaves();
         yield return null;
     }
-    IEnumerator Destroy(GameObject go) {
+    IEnumerator Destroy(GameObject _gameObject) {
         yield return null;
-        DestroyImmediate(go);
-    }
-
-    private void FixedUpdate() {
-        foreach (WaterSpring waterSpring in springs) {
-            waterSpring.WaveSpringUpdate(springStiffness, dampening);
-            waterSpring.WavePointUpdate();
-        }
-
-        UpdateSprings();
+        DestroyImmediate(_gameObject);
     }
 
     private void SetWaves() {
@@ -73,42 +63,36 @@ public class WaterShapeController : MonoBehaviour {
 
     private void CreateSprings(Spline waterSpline) {
         springs = new();
-        for (int i = 0; i < wavesCount + 1; i++) {
-            int index = i + 1;
-
-            Smoothen(waterSpline, index);
-
+        for (int i = 0; i <= wavesCount + 1; i++) {
+            SmoothenTangents(waterSpline, i + 1);
             GameObject wavePoint = Instantiate(wavePointPrefab, wavePoints.transform, false);
-            wavePoint.transform.localPosition = waterSpline.GetPosition(index);
-            WaterSpring waterSpring = wavePoint.GetComponent<WaterSpring>();
+            wavePoint.transform.localPosition = waterSpline.GetPosition(i + 1);
+            Spring waterSpring = wavePoint.GetComponent<Spring>();
             waterSpring.Init(spriteShapeController);
             springs.Add(waterSpring);
         }
     }
 
-    private void UpdateSprings() {
-        float[] leftDeltas = new float[springs.Count];
-        float[] rightDeltas = new float[springs.Count];
+    private void FixedUpdate() {
+        foreach (Spring waterSpring in springs) {
+            waterSpring.SpringUpdate(springStiffness, dampening);
+            waterSpring.SplineUpdate();
+        }
+        UpdateSprings();
+    }
 
+    private void UpdateSprings() {
         for (int i = 0; i < springs.Count; i ++) {
             if (i > 0) {
-                leftDeltas[i] = spread * (springs[i].height - springs[i - 1].height);
-                springs[i - 1].velocity += leftDeltas[i];
+                springs[i - 1].velocity += (springs[i].height - springs[i - 1].height) * spread;
             }
-            if (i < 0) {
-                rightDeltas[i] = spread * (springs[i].height - springs[i + 1].height);
-                springs[i + 1].velocity += rightDeltas[i];
+            if (i < springs.Count - 1) {
+                springs[i + 1].velocity += (springs[i].height - springs[i + 1].height) * spread;
             }
         }
     }
 
-    private void Splash(int index, float speed) {
-        if (index >= 0 && index < springs.Count) {
-            springs[index].velocity += speed;
-        }
-    }
-
-    private void Smoothen(Spline waterSpline, int index)
+    private void SmoothenTangents(Spline waterSpline, int index)
     {
         Vector3 position = waterSpline.GetPosition(index);
         Vector3 positionPrev = position;
