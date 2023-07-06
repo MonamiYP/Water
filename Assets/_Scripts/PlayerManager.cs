@@ -23,6 +23,7 @@ public class PlayerManager : MonoBehaviour {
 
     private void Update() {
         HandleMovement();
+        IsUnderwater();
     }
 
     private void HandleMovement() {
@@ -30,6 +31,7 @@ public class PlayerManager : MonoBehaviour {
 
         if (isUnderwater) {
             rb.velocity = inputVector * moveSpeed;
+            //rb.velocity = new Vector2(inputVector.x * moveSpeed, rb.velocity.y); 
         } else {
             rb.velocity = new Vector2(inputVector.x * moveSpeed, rb.velocity.y); 
         }
@@ -38,8 +40,16 @@ public class PlayerManager : MonoBehaviour {
     }
 
     private void InputManager_OnJump(object sender, System.EventArgs e) {
-        if (!isUnderwater && rb.velocity.y == 0) {
+        if (!isUnderwater && rb.velocity.y == 0 || isUnderwater) {
             rb.AddForce(Vector2.up * jumpAmount, ForceMode2D.Impulse);
+        }
+    }
+
+    private void IsUnderwater() {
+        if (transform.position.y < 0) {
+            isUnderwater = true;
+        } else {
+            isUnderwater = false;
         }
     }
 

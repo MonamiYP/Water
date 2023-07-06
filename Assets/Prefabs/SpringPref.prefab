@@ -100,6 +100,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   velocity: 0
   height: 0
+  resistance: 40
 --- !u!58 &9011227159182546203
 CircleCollider2D:
   m_ObjectHideFlags: 0

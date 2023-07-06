@@ -76,12 +76,14 @@ public class WaterShapeController : MonoBehaviour {
     private void FixedUpdate() {
         foreach (Spring waterSpring in springs) {
             waterSpring.SpringUpdate(springStiffness, dampening);
+            waterSpring.SineWave();
+            waterSpring.PositionUpdate();
             waterSpring.SplineUpdate();
         }
-        UpdateSprings();
+        UpdateSpringNeighbours();
     }
 
-    private void UpdateSprings() {
+    private void UpdateSpringNeighbours() {
         for (int i = 0; i < springs.Count; i ++) {
             if (i > 0) {
                 springs[i - 1].velocity += (springs[i].height - springs[i - 1].height) * spread;

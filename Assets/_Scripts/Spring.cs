@@ -11,6 +11,7 @@ public class Spring : MonoBehaviour {
     private float force;
     private float targetHeight;
     private int index;
+    private float waveAmplitude;
 
     [SerializeField] private static SpriteShapeController spriteShapeController;
     [SerializeField] private float resistance = 40f;
@@ -26,13 +27,11 @@ public class Spring : MonoBehaviour {
     }
 
     public void SpringUpdate(float k, float dampingRatio) {
-        height = transform.localPosition.y;
 
         float extension = height - targetHeight;
         force = -k * extension - dampingRatio * velocity;
         velocity += force;
-
-        transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y + velocity, transform.localPosition.z);
+        height += velocity;
     }
 
     public void SplineUpdate() { 
@@ -41,6 +40,14 @@ public class Spring : MonoBehaviour {
             Vector3 splinePosition = spline.GetPosition(index);
             spline.SetPosition(index, new Vector3(splinePosition.x, transform.localPosition.y, splinePosition.z));
         }
+    }
+
+    public void SineWave() {
+        waveAmplitude = 0.1f * Mathf.Sin(Time.time + index/2);
+    }
+
+    public void PositionUpdate() {
+        transform.localPosition = new Vector3(transform.localPosition.x, height + waveAmplitude, transform.localPosition.z);
     }
 
     private void OnCollisionEnter2D(Collision2D other) {
