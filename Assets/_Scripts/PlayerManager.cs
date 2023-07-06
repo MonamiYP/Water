@@ -6,7 +6,7 @@ public class PlayerManager : MonoBehaviour {
 
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float jumpAmount = 5f;
-    [SerializeField] private float gravityWater = 1f;
+    [SerializeField] private float gravityWater = 0f;
     [SerializeField] private float gravityNormal = 2f;
     [SerializeField] private float gravityFalling = 4f;
 
@@ -31,7 +31,7 @@ public class PlayerManager : MonoBehaviour {
         if (isUnderwater) {
             rb.velocity = inputVector * moveSpeed;
         } else {
-            rb.velocity = new Vector2(inputVector.x * moveSpeed, rb.velocity.y);
+            rb.velocity = new Vector2(inputVector.x * moveSpeed, rb.velocity.y); 
         }
         
         HandleGravity();
@@ -45,7 +45,7 @@ public class PlayerManager : MonoBehaviour {
 
     private void HandleGravity() {
         if (rb.velocity.y >= 0) {
-                rb.gravityScale = gravityNormal;
+            rb.gravityScale = gravityNormal;
         } else {
             rb.gravityScale = gravityFalling;
         }
