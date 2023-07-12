@@ -16,6 +16,7 @@ public class PlayerManager : MonoBehaviour {
     [SerializeField] public bool isUnderwater = false;
 
     private bool plunge = false;
+    private bool isFacingRight = true;
 
     private void Start() {
         inputManager.OnJump += InputManager_OnJump;
@@ -29,12 +30,19 @@ public class PlayerManager : MonoBehaviour {
 
     private void HandleMovement() {
         Vector2 inputVector = inputManager.GetMovementVector();
+        
+        if (isFacingRight && inputVector.x < -0f || !isFacingRight && inputVector.x > 0f) {
+            isFacingRight = !isFacingRight;
+            Vector3 localScale = transform.localScale;
+            localScale.x *= -1f;
+            transform.localScale = localScale;
+        }
 
         if (isUnderwater && !plunge) {
             rb.velocity = new Vector2(inputVector.x * moveSpeed, inputVector.y * moveSpeed); 
         } else {
             rb.velocity = new Vector2(inputVector.x * moveSpeed, rb.velocity.y); 
-        }
+        }  
         
         HandleGravity();
         Plunge();
