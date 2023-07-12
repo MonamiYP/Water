@@ -43,7 +43,7 @@ public class Spring : MonoBehaviour {
     }
 
     public void SineWave() {
-        waveAmplitude = 0.1f * Mathf.Sin(Time.time + index/2);
+        waveAmplitude = 0.05f * Mathf.Sin(Time.time + index/2);
     }
 
     public void PositionUpdate() {

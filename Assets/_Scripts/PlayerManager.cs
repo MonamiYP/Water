@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerManager : MonoBehaviour {
 
     [SerializeField] private float moveSpeed = 5f;
-    [SerializeField] private float jumpAmount = 5f;
+    [SerializeField] private float jumpAmount = 10f;
     [SerializeField] private float gravityWater = 0f;
     [SerializeField] private float gravityNormal = 2f;
     [SerializeField] private float gravityFalling = 4f;
@@ -15,6 +15,8 @@ public class PlayerManager : MonoBehaviour {
 
     [SerializeField] public bool isUnderwater = false;
 
+    private bool plunge = false;
+
     private void Start() {
         inputManager.OnJump += InputManager_OnJump;
 
@@ -23,33 +25,34 @@ public class PlayerManager : MonoBehaviour {
 
     private void Update() {
         HandleMovement();
-        IsUnderwater();
     }
 
     private void HandleMovement() {
         Vector2 inputVector = inputManager.GetMovementVector();
 
-        if (isUnderwater) {
-            rb.velocity = inputVector * moveSpeed;
-            //rb.velocity = new Vector2(inputVector.x * moveSpeed, rb.velocity.y); 
+        if (isUnderwater && !plunge) {
+            rb.velocity = new Vector2(inputVector.x * moveSpeed, inputVector.y * moveSpeed); 
         } else {
             rb.velocity = new Vector2(inputVector.x * moveSpeed, rb.velocity.y); 
         }
         
         HandleGravity();
+        Plunge();
     }
 
     private void InputManager_OnJump(object sender, System.EventArgs e) {
-        if (!isUnderwater && rb.velocity.y == 0 || isUnderwater) {
+        if (!isUnderwater && rb.velocity.y == 0) {
             rb.AddForce(Vector2.up * jumpAmount, ForceMode2D.Impulse);
         }
     }
 
-    private void IsUnderwater() {
-        if (transform.position.y < 0) {
-            isUnderwater = true;
-        } else {
-            isUnderwater = false;
+    private void Plunge() {
+        if (plunge) {
+            if (Mathf.Abs(rb.velocity.y) <= 2) {
+                plunge = false;
+            } else {
+                rb.AddForce(-rb.velocity * 0.2f, ForceMode2D.Force);
+            }
         }
     }
 
@@ -62,5 +65,18 @@ public class PlayerManager : MonoBehaviour {
 
         if (isUnderwater)
             rb.gravityScale = gravityWater;
+    }
+
+    private void OnTriggerEnter2D(Collider2D other) {
+        if (other.gameObject.tag == "Water") {
+            isUnderwater = true;
+            plunge = true;
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D other) {
+        if (other.gameObject.tag == "Water") {
+            isUnderwater = false;
+        }
     }
 }
